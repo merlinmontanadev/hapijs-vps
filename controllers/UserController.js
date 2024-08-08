@@ -318,6 +318,7 @@ const handleEditUser = async (request, h) => {
 const handleDeleteUser = async (request, h) => {
     const { user_id } = request.params;
     const { user_logged_id } = request.payload;
+    
     try {
       const getUserRole = await User.findByPk(user_id);
       const userRole = getUserRole.role;

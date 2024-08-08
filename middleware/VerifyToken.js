@@ -11,7 +11,6 @@ const verifyToken = async (request, h) => {
    }
 
    const token = authHeader && authHeader.split(' ')[1];
-
    try {
       const decoded = jwt.verify(token, TOKEN_SECRET);
       // Attach the user data to the request object
