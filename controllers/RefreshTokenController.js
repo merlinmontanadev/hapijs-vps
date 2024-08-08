@@ -19,7 +19,9 @@ const handleRefreshToken = async (request, h) =>{
         const role = user[0].role;
         const accessToken = jwt.sign({ user_id: user_id, username: username, email: email, role: role }, TOKEN_SECRET, { expiresIn: '20s' });
 
-        return h.response({ accessToken: accessToken }).header('Access-Control-Allow-Credentials', 'true') .code(200);
+        return h.response({ accessToken: accessToken })
+        .code(200);
+        
     } catch (err) {
         console.log(err);
         return h.response('Forbidden').code(403);

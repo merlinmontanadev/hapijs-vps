@@ -56,6 +56,8 @@ const handleLogin = async (request, h) =>{
         response.state('refreshToken', refreshToken, {
           isHttpOnly: true,
           ttl: 24 * 60 * 60 * 1000, // Waktu kadaluarsa dalam milidetik
+          sameSite: 'None', // Mengizinkan pengiriman cookie lintas domain
+          secure: true // Mengirim cookie hanya melalui HTTPS
         });
 
         return h.response({ accessToken }).code(200);

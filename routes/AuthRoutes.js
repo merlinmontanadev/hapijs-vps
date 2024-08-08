@@ -1,6 +1,6 @@
 const {handleLogin, handleLogout} = require('../controllers/AuthController');
 const corsOptions = {
-  origin: ['http://localhost:3000'], // Ganti dengan domain frontend Anda
+  origin: ['http://localhost:3000', 'https://dharmawirawan.69dev.id'], // Ganti dengan domain frontend Anda
   credentials: true // Penting untuk pengaturan cookie
 };
 
