@@ -8,6 +8,7 @@ const guruRoutes = require('./routes/GuruRoutes');
 const muridRoutes = require('./routes/MuridRoutes');
 const tokenRoutes = require('./routes/TokenRoutes');
 const testRoutes = require('./routes/TestRoutes');
+const navRoutes = require('./routes/NavRoutes');
 const Inert = require('@hapi/inert');
 const fs = require('fs');
 const path = require('path');
@@ -96,7 +97,7 @@ const init = async () => {
     server.route(muridRoutes);
     server.route(tokenRoutes);
     server.route(testRoutes);
-
+    server.route(navRoutes)
     
     await server.start();
     console.log('Server running on %s', server.info.uri);
@@ -110,7 +111,7 @@ const init = async () => {
 
     const db = require("./models")
 
-    db.sequelize.sync({alter: true, force: true}).then(() => {
+    db.sequelize.sync({alter: false, force: false}).then(() => {
     console.log("Berhasil Sinkronisasi dengan DB.");
     }).catch((err) => {
     console.log("Gagal Sinkronisasi DB" + err.message);
