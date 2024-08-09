@@ -23,6 +23,7 @@ db.Pelanggaran = require("./PelanggaranModel.js")(sequelize, Sequelize);
 db.Poin = require("./PoinModel.js")(sequelize, Sequelize);
 db.Perusahaan = require("./PerusahaanInstitusiModel.js")(sequelize, Sequelize);
 db.User = require("./UserModel.js")(sequelize, Sequelize);
+db.NavItem = require("./NavModel.js")(sequelize, Sequelize);
 db.Test = require("./TestModel.js")(sequelize, Sequelize);
 
 db.KategoriPoin.hasMany(db.Poin, {

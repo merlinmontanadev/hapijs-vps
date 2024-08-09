@@ -110,7 +110,7 @@ const init = async () => {
 
     const db = require("./models")
 
-    db.sequelize.sync({alter: false, force: false}).then(() => {
+    db.sequelize.sync({alter: true, force: true}).then(() => {
     console.log("Berhasil Sinkronisasi dengan DB.");
     }).catch((err) => {
     console.log("Gagal Sinkronisasi DB" + err.message);
