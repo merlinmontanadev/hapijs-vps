@@ -1,3 +1,5 @@
+const { v4: uuidv4 } = require('uuid');
+const { hash } = require('bcryptjs')
 const bcrypt = require('bcryptjs');
 const Joi = require('joi');
 const { TOKEN_SECRET, REFRESH_TOKEN_SECRET } = require('../constants')
@@ -136,7 +138,72 @@ const handleLogout = async (request, h) => {
 };
 
 
+const handleRegister = async (request, h) => {
+  const { username, role, email, jk, nohp } = request.payload;
+  const user_id = uuidv4();
+  const password = "12345678";
+  const hashedPassword = await hash(password, 10)
+  const status = "Inactive";
+  const userDataSchema = Joi.object({
+    user_id: Joi.string(),
+    username: Joi.string().pattern(new RegExp('^[a-z0-9]{3,30}$')).required(),
+    jk: Joi.string().valid('Pria', 'Wanita').required(),
+    email: Joi.string().email({ minDomainSegments: 1, tlds: { allow: ['com'] } }).required(),
+    role: Joi.string().valid('Admin', 'User').required(),
+    nohp: Joi.string().pattern(new RegExp('^[0-9]*$')).min(10).max(13).required(),
+  });
+  const { error } = userDataSchema.validate(request.payload);
+  if (error) {
+    const formattedError = {
+      message: error.details[0].message,
+    };
+    return h.response(formattedError).code(400);
+  }
+
+  try {
+    const checkUsername = await User.findOne({ where: { username: username } })
+    if (checkUsername) {
+      // Username sudah terdaftar, kembalikan respons dengan pesan error
+      const errorResponse = {
+        message: 'Username sudah terdaftar',
+      };
+      return h.response(errorResponse).code(400);
+    } else {
+
+    const userData = {
+      username,
+      email,
+      password: hashedPassword,
+      role,
+      jk,
+      nohp,
+      status: status
+    };
+
+    const newUser = await User.create(userData);
+
+    const formattedResponse = {
+      message: 'User saved successfully',
+      data: {
+        user_id: user_id, // Mengembalikan UUID dari data yang disimpan
+        id: newUser.insertId, // Mengembalikan ID dari data yang disimpan
+        username: username,
+      }
+    };
+    return h.response(formattedResponse).code(201); // Mengembalikan respons dengan kode status 201 (Created)
+  }
+} catch (error) {
+  // Tangani kesalahan saat melakukan validasi atau penyimpanan data
+  console.error(error);
+  const formattedError = {
+    message: error.message,
+  };
+  return h.response(formattedError).code(500);
+}
+}
 
 
 
-    module.exports = {handleLogin, handleLogout}; // Export fungsi
+
+
+    module.exports = {handleLogin, handleLogout, handleRegister}; // Export fungsi

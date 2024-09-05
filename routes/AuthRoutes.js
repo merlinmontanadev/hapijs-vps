@@ -1,4 +1,4 @@
-const {handleLogin, handleLogout} = require('../controllers/AuthController');
+const {handleLogin, handleLogout, handleRegister} = require('../controllers/AuthController');
 const corsOptions = {
   origin: ['http://localhost:3000', 'https://dharmawirawan.69dev.id'], // Ganti dengan domain frontend Anda
   credentials: true // Penting untuk pengaturan cookie
@@ -13,6 +13,11 @@ const authRoutes = [
     options: {
       cors: corsOptions
     }
+  },
+  {
+    method: 'POST',
+    path: '/register',
+    handler: handleRegister,
   },
   {
     method: 'DELETE',
