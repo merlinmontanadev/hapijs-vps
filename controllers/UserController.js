@@ -322,7 +322,11 @@ const handleDeleteUser = async (request, h) => {
     try {
       const getUserRole = await User.findByPk(user_id);
       const userRole = getUserRole.role;
-      if (userRole === 'Admin') {
+      const getLoggedUserID = await User.findByPk(user_logged_id);
+      const loggedRole = getLoggedUserID.role;
+      const loggedUsername =getLoggedUserID.username
+      
+      if (userRole === 'Admin' && loggedUsername !== 'aditya') {
         // Menampilkan pesan kesalahan jika pengguna adalah Super Admin
         const formattedResponse = {
           message: 'Admin cannot be deleted',
@@ -330,8 +334,6 @@ const handleDeleteUser = async (request, h) => {
         return h.response(formattedResponse).code(403);
       }
 
-      const getLoggedUserID = await User.findByPk(user_logged_id);
-      const loggedRole = getLoggedUserID.role;
       if (loggedRole === 'User') {
         const formattedResponse = {
           message: '(Forbidden) role user cannot deleted another user',
