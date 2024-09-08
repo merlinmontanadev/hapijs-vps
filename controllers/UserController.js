@@ -115,11 +115,14 @@ const handlerSaveUser = async (request, h) => {
         const newUser = await User.create(userData);
 
         const formattedResponse = {
+          
+          status_code: 201,
           message: 'User saved successfully',
           data: {
             user_id: user_id, // Mengembalikan UUID dari data yang disimpan
             id: newUser.insertId, // Mengembalikan ID dari data yang disimpan
             username: username,
+          }
             // email: email,
             // jk: jk,
             // nohp: nohp,
@@ -127,7 +130,6 @@ const handlerSaveUser = async (request, h) => {
             // status: status,
             // file : fileData,
             // fileMimeType: fileMimeType
-          }
         };
         return h.response(formattedResponse).code(201); // Mengembalikan respons dengan kode status 201 (Created)
       }
@@ -315,6 +317,29 @@ const handleEditUser = async (request, h) => {
     }
 }
 
+const handleChangeRole = async (request, h) => {
+  const { user_id } = request.params;
+  const { role } = request.payload;
+  const user = await User.findByPk(user_id);
+  if (!user) {
+    return h.response({
+      message: 'User not found',
+    }).code(404);
+  }
+  const updated = await User.update({ role }, { where: { user_id: user_id } });
+  if (updated) {
+    const formattedResponse = {
+      message: 'User role updated successfully',
+    };
+    return h.response(formattedResponse).code(200);
+  } else {
+    const formattedResponse = {
+      message: 'Error updating user role',
+    };
+    return h.response(formattedResponse).code(400);
+  }
+}
+
 const handleDeleteUser = async (request, h) => {
     const { user_id } = request.params;
     const { user_logged_id } = request.payload;
@@ -326,8 +351,14 @@ const handleDeleteUser = async (request, h) => {
       const loggedRole = getLoggedUserID.role;
       const loggedUsername =getLoggedUserID.username
       
+      if (user_id === user_logged_id) {
+        const formattedResponse = {
+          message: 'You cannot delete your own account.',
+        };
+        return h.response(formattedResponse).code(403);
+      }
+      
       if (userRole === 'Admin' && loggedUsername !== 'aditya') {
-        // Menampilkan pesan kesalahan jika pengguna adalah Super Admin
         const formattedResponse = {
           message: 'Admin cannot be deleted',
         };
@@ -336,7 +367,7 @@ const handleDeleteUser = async (request, h) => {
 
       if (loggedRole === 'User') {
         const formattedResponse = {
-          message: '(Forbidden) role user cannot deleted another user',
+          message: '(Forbidden) User role cannot delete another user',
         };
         return h.response(formattedResponse).code(403);
       }
@@ -413,4 +444,4 @@ const handleGetTest = async (request, h) => {
 }
 
 
-module.exports = {handlerGetUser, handlerGetUserID, handlerSaveUser, handleEditUser, handleDeleteUser, handleResetPassowrd, handleChangeStatus, handleTest, handleGetTest, handleChangeFoto}; // Export fungsi
+module.exports = {handlerGetUser, handlerGetUserID, handlerSaveUser, handleEditUser, handleDeleteUser, handleResetPassowrd, handleChangeStatus, handleTest, handleGetTest, handleChangeFoto, handleChangeRole}; // Export fungsi
