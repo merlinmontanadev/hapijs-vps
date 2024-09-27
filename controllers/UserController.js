@@ -6,6 +6,7 @@ const fs = require('fs');
 const User = db.User;
 const Guru = db.Guru  
 const path = require('path');
+const { request } = require('http');
 const Test = db.Test;
 
 const handlerGetUser = async (request, h) => {
@@ -271,8 +272,8 @@ const handleEditUser = async (request, h) => {
     // Hasing Password
     const hashedPassword = await hash(password, 10)
     const userDataSchema = Joi.object({
-      password: Joi.string().pattern(new RegExp('^[a-z0-9]{3,30}$')).required(),
-      role: Joi.string().valid('Super Admin', 'Admin', 'User').required()
+      password: Joi.string().pattern(new RegExp('^[a-z0-9!@#$%^&*()_+\\-=\\[\\]{};":\\\\|,.<>\\/?]{3,30}$')).required(),
+      role: Joi.string().valid('Admin', 'User').required()
     });
 
     const { error } = userDataSchema.validate(request.payload);
@@ -315,6 +316,57 @@ const handleEditUser = async (request, h) => {
         };
         return h.response(formattedError).code(500);
     }
+}
+
+const handleChangeContactInformation = async (request, h) => {
+  const { user_id } = request.params;
+  const { email, nohp} = request.payload;
+
+  const userDataSchema = Joi.object({
+    email: Joi.string().email({ minDomainSegments: 1, tlds: { allow: ['com'] } }).required(),
+    nohp: Joi.string().pattern(new RegExp('^[0-9]*$')).min(10).max(13).required(),
+  });
+
+  const { error } = userDataSchema.validate(request.payload);
+  if (error) {
+    const formattedError = {
+      error: true,
+      message: error.details[0].message,
+    };
+    return h.response(formattedError).code(400);
+  }
+
+  try {
+    const userData = {
+        email: email,
+        nohp: nohp
+    };
+    // Lakukan operasi edit data pengguna di database berdasarkan user_id
+     const updated = await User.update(userData, { where: { user_id: user_id } });
+    if (updated) {
+        const formattedResponse = {
+            message: 'User updated successfully',
+            data: {
+              email: email, // Mengembalikan UUID dari data yang disimpan
+              nohp: nohp // Mengembalikan ID dari data yang disimpan
+            }
+        };
+        return h.response(formattedResponse).code(200); // Return response with status code 200 (OK)
+    } else {
+      const formattedResponse = {
+        message: 'User data unchanged',
+    };
+    return h.response(formattedResponse).code(200);
+    }
+
+} catch (error) {
+    console.error(error);
+    const formattedError = {
+        message: error.message
+    };
+    return h.response(formattedError).code(500);
+}
+
 }
 
 const handleChangeRole = async (request, h) => {
@@ -444,4 +496,4 @@ const handleGetTest = async (request, h) => {
 }
 
 
-module.exports = {handlerGetUser, handlerGetUserID, handlerSaveUser, handleEditUser, handleDeleteUser, handleResetPassowrd, handleChangeStatus, handleTest, handleGetTest, handleChangeFoto, handleChangeRole}; // Export fungsi
+module.exports = {handlerGetUser, handlerGetUserID, handlerSaveUser, handleEditUser, handleChangeContactInformation, handleDeleteUser, handleResetPassowrd, handleChangeStatus, handleTest, handleGetTest, handleChangeFoto, handleChangeRole}; // Export fungsi

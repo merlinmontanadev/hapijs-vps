@@ -1,4 +1,4 @@
-const {handlerGetUser, handlerGetUserID, handlerSaveUser, handleEditUser, handleDeleteUser, handleResetPassowrd, handleChangeStatus, handleTest, handleGetTest, handleChangeFoto, handleChangeRole} = require('../controllers/UserController');
+const {handlerGetUser, handlerGetUserID, handlerSaveUser, handleChangeContactInformation, handleEditUser, handleDeleteUser, handleResetPassowrd, handleChangeStatus, handleTest, handleGetTest, handleChangeFoto, handleChangeRole} = require('../controllers/UserController');
 const verifyToken = require('../middleware/VerifyToken');
 
 const urlApi = '/api/v1';
@@ -36,6 +36,11 @@ const userRoutes = [
     method: 'PATCH',
     path: urlApi + '/edit/user/{user_id}',
     handler: handleEditUser
+  },
+  {
+    method: 'PATCH',
+    path: urlApi + '/edit/user/contact/{user_id}',
+    handler: handleChangeContactInformation
   },
   {
     method: 'PATCH',
