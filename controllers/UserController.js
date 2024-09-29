@@ -392,6 +392,29 @@ const handleChangeRole = async (request, h) => {
   }
 }
 
+const handleJk = async (request, h) => {
+  const { user_id } = request.params;
+  const { jk } = request.payload;
+  const user = await User.findByPk(user_id);
+  if (!user) {
+    return h.response({
+      message: 'User not found',
+    }).code(404);
+  }
+  const updated = await User.update({ jk }, { where: { user_id: user_id } });
+  if (updated) {
+    const formattedResponse = {
+      message: 'User gender updated successfully',
+    };
+    return h.response(formattedResponse).code(200);
+  } else {
+    const formattedResponse = {
+      message: 'Error updating user gender',
+    };
+    return h.response(formattedResponse).code(400);
+  }
+}
+
 const handleDeleteUser = async (request, h) => {
     const { user_id } = request.params;
     const { user_logged_id } = request.payload;
@@ -496,4 +519,4 @@ const handleGetTest = async (request, h) => {
 }
 
 
-module.exports = {handlerGetUser, handlerGetUserID, handlerSaveUser, handleEditUser, handleChangeContactInformation, handleDeleteUser, handleResetPassowrd, handleChangeStatus, handleTest, handleGetTest, handleChangeFoto, handleChangeRole}; // Export fungsi
+module.exports = {handlerGetUser, handlerGetUserID, handlerSaveUser, handleEditUser, handleChangeContactInformation, handleJk, handleDeleteUser, handleResetPassowrd, handleChangeStatus, handleTest, handleGetTest, handleChangeFoto, handleChangeRole}; // Export fungsi

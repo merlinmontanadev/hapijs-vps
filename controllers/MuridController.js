@@ -319,5 +319,47 @@ const handleDeleteMurid = async (request, h) => {
   } 
 }
 
+const handleChangeFoto = async (request, h) => {
+  const { id_murid } = request.params;
+  const { file } = request.payload;
+  const murid = await Murid.findByPk(id_murid)
+  if (!murid) {
+    return h.response({
+      message: 'Murid not found',
+    }).code(404);
+  }
 
-  module.exports = {handlerGetMurid, handlerGetMuridID, handlerSaveMurid, handleEditMurid, handleDeleteMurid}; // Export fungsi
+  if (!file) {
+    return h.response({ message: 'No file uploaded' }).code(400);
+}
+
+const allowedMimeTypes = ['image/jpeg','image/jpg', 'image/png'];
+const fileMimeType = file.hapi.headers['content-type'];
+console.log(fileMimeType)
+
+        // Pastikan tipe konten file didukung
+        if (!allowedMimeTypes.includes(fileMimeType)) {
+          return h.response({ error: 'Unsupported file type. Only JPEG, and PNG images are allowed' }).code(415);
+      }
+      const fileData = file._data; // Ambil data file dari payload
+
+  const muridData = {
+    file: fileData
+  }
+
+  const updated = await Murid.update(muridData, { where: { id_murid: id_murid } });
+  if (updated) {
+    const formattedResponse = {
+      message: 'Murid foto updated successfully',
+    };
+    return h.response(formattedResponse).code(200);
+  } else {
+    const formattedResponse = {
+      message: 'Murid not found',
+    };
+    return h.response(formattedResponse).code(404);
+  }
+}
+
+
+  module.exports = {handleChangeFoto, handlerGetMurid, handlerGetMuridID, handlerSaveMurid, handleEditMurid, handleDeleteMurid}; // Export fungsi

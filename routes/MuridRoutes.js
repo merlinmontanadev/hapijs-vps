@@ -1,4 +1,4 @@
-const {handlerGetMurid, handlerGetMuridID, handlerSaveMurid, handleEditMurid, handleDeleteMurid} = require('../controllers/MuridController');
+const {handlerGetMurid, handlerGetMuridID, handlerSaveMurid, handleEditMurid, handleDeleteMurid, handleChangeFoto} = require('../controllers/MuridController');
 const verifyToken = require('../middleware/VerifyToken');
 
 const urlApi = '/api/v1';
@@ -36,6 +36,19 @@ const muridRoutes = [
     method: 'PATCH',
     path: urlApi + '/edit/murid/{id_murid}',
     handler: handleEditMurid
+  },
+  {
+    method: 'PATCH',
+    path: urlApi + '/edit/murid/foto/{id_murid}',
+    options: {
+      payload: {
+          maxBytes: 10485760, // 10 MB
+          output: 'stream',
+          allow: 'multipart/form-data',
+          multipart: true
+      }
+  },
+    handler: handleChangeFoto
   },
   {
     method: 'DELETE',
