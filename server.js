@@ -10,6 +10,7 @@ const tokenRoutes = require('./routes/TokenRoutes');
 const testRoutes = require('./routes/TestRoutes');
 const navRoutes = require('./routes/NavRoutes');
 const Inert = require('@hapi/inert');
+const https = require('https');
 const fs = require('fs');
 const path = require('path');
 
@@ -45,12 +46,17 @@ const init = async () => {
     const jam12HourFormat = jam % 12 || 12;
 
     server.events.on('response', function (request) {
+        // Informasi client IP dan lainnya
         const remoteAddress = request.info.remoteAddress;
-        const ipv4 = remoteAddress === '::1:' ? remoteAddress :  '127.0.0.1';
         const method = request.method.toUpperCase();
-        const formattedMethod = method === 'GET' ? `\x1b[32m GET \x1b[0m` : method === 'POST' ? '\x1b[33m POST \x1b[0m' : method === 'PUT' ? 'PUT' : method === 'DELETE' ? '\x1b[31m DELETE \x1b[0m' : method === 'PATCH' ? '\x1b[35m PATCH \x1b[0m' : '---';
-        const statusCode = request.response.statusCode
-
+        const formattedMethod = method === 'GET' ? `\x1b[32m GET \x1b[0m` :
+            method === 'POST' ? '\x1b[33m POST \x1b[0m' :
+            method === 'PUT' ? 'PUT' :
+            method === 'DELETE' ? '\x1b[31m DELETE \x1b[0m' :
+            method === 'PATCH' ? '\x1b[35m PATCH \x1b[0m' : '---';
+    
+        const statusCode = request.response.statusCode;
+    
         let formattedStatusCode;
         if (statusCode >= 200 && statusCode < 300) {
             formattedStatusCode = `\x1b[32m${statusCode}\x1b[0m`; // Green
@@ -66,6 +72,7 @@ const init = async () => {
             formattedStatusCode = `\x1b[0m${statusCode}\x1b[0m`; // Default color
         }
 
+
         const textColors = [
             '\x1b[32m', // Hijau
             '\x1b[33m', // Kuning
@@ -79,15 +86,38 @@ const init = async () => {
         }
 
         const randomColor = randomTextColor();
-
-        const logMessage = `${ipv4}|${method}|${request.path}|${statusCode}|${tanggalFormatted}/${bulanFormatted}/${tahun}|${jam12HourFormat}:${menitFormatted} ${amOrPm}\n`;
-
-        console.log(ipv4 + formattedMethod + request.path + ' --> ' + formattedStatusCode + ' | ' + `${randomColor}${tanggalFormatted}/${bulanFormatted}/${tahun}, ${jam12HourFormat}:${menitFormatted} ${amOrPm} \x1b[0m`);
-        
-        fs.appendFile(path.join(__dirname, 'log.txt'), logMessage, (err) => {
-            if (err) {
-                console.error('Failed to write to log file:', err);
-            }
+    
+        // Meminta IP publik server di dalam event handler
+        https.get('https://api.ipify.org?format=json', (resp) => {
+            let data = '';
+    
+            // Menerima chunk data
+            resp.on('data', (chunk) => {
+                data += chunk;
+            });
+    
+            // Setelah seluruh data diterima
+            resp.on('end', () => {
+                const publicIP = JSON.parse(data).ip;
+    
+                // Gunakan IP publik di sini
+                const ipv4 = remoteAddress === '::1' ? publicIP : remoteAddress;
+                
+                // Asumsikan variabel tanggalFormatted, bulanFormatted, tahun, jam12HourFormat, menitFormatted, amOrPm sudah didefinisikan
+                const logMessage = `${publicIP}|${ipv4}|${method}|${request.path}|${statusCode}|${tanggalFormatted}/${bulanFormatted}/${tahun}|${jam12HourFormat}:${menitFormatted} ${amOrPm}\n`;
+    
+                console.log(`${publicIP}|${ipv4}|${formattedMethod}|${request.path}|${formattedStatusCode}|${randomColor}${tanggalFormatted}/${bulanFormatted}/${tahun}, ${jam12HourFormat}:${menitFormatted} ${amOrPm} \x1b[0m`);
+    
+                // Simpan log ke file jika perlu
+                fs.appendFile(path.join(__dirname, 'log.txt'), logMessage, (err) => {
+                    if (err) {
+                        console.error('Failed to write to log file:', err);
+                    }
+                });
+            });
+    
+        }).on("error", (err) => {
+            console.log("Error: " + err.message);
         });
     });
 
