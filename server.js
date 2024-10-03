@@ -47,6 +47,7 @@ const init = async () => {
 
     server.events.on('response', function (request) {
         // Informasi client IP dan lainnya
+        const userAgent = request.headers['user-agent'];
         const remoteAddress = request.info.remoteAddress;
         const method = request.method.toUpperCase();
         const formattedMethod = method === 'GET' ? `\x1b[32m GET \x1b[0m` :
@@ -99,14 +100,11 @@ const init = async () => {
             // Setelah seluruh data diterima
             resp.on('end', () => {
                 const publicIP = JSON.parse(data).ip;
-    
-                // Gunakan IP publik di sini
-                const ipv4 = remoteAddress === '::1' ? publicIP : remoteAddress;
                 
                 // Asumsikan variabel tanggalFormatted, bulanFormatted, tahun, jam12HourFormat, menitFormatted, amOrPm sudah didefinisikan
-                const logMessage = `${publicIP}|${ipv4}|${method}|${request.path}|${statusCode}|${tanggalFormatted}/${bulanFormatted}/${tahun}|${jam12HourFormat}:${menitFormatted} ${amOrPm}\n`;
+                const logMessage = `${publicIP}|${method}|${request.path}|${statusCode}|${tanggalFormatted}/${bulanFormatted}/${tahun}|${jam12HourFormat}:${menitFormatted} ${amOrPm}|${userAgent}\n`;
     
-                console.log(`${publicIP}|${ipv4}|${formattedMethod}|${request.path}|${formattedStatusCode}|${randomColor}${tanggalFormatted}/${bulanFormatted}/${tahun}, ${jam12HourFormat}:${menitFormatted} ${amOrPm} \x1b[0m`);
+                console.log(`${publicIP}|${formattedMethod}|${request.path}|${formattedStatusCode}|${randomColor}${tanggalFormatted}/${bulanFormatted}/${tahun}, ${jam12HourFormat}:${menitFormatted} ${amOrPm} \x1b[0m`);
     
                 // Simpan log ke file jika perlu
                 fs.appendFile(path.join(__dirname, 'log.txt'), logMessage, (err) => {
